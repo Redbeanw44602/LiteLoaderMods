@@ -17,17 +17,17 @@ unordered_map<string, int> EnItem{
 bool onStartDestroy(Event::PlayerStartDestroyBlockEvent event)
 {
     auto pl = event.mPlayer;
-	auto &mainhand = pl->getSelectedItem();
-    if (mainhand.isNull())
+	auto mainhand = &pl->getSelectedItem();
+    if (mainhand->isNull())
         return true;
-    auto newHand = mainhand.clone();
-    auto &offhand = pl->getOffhandSlot();
-    if (EnItem.find(newHand.getTypeName()) != EnItem.end() && offhand.isNull())
+    auto newHand = mainhand->clone_s();
+    auto offhand = &pl->getOffhandSlot();
+    if (EnItem.find(newHand->getTypeName()) != EnItem.end() && offhand->isNull())
     {
         auto &cont = pl->getInventory();
         auto nowSlot = pl->getSelectedItemSlot();
         cont.removeItem(nowSlot, 64);
-        pl->setOffhandSlot(newHand);
+        pl->setOffhandSlot(*newHand);
         pl->sendInventory(true);
 
     }
