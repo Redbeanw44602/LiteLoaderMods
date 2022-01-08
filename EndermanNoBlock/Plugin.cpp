@@ -34,7 +34,7 @@ THook(bool, "?canUse@EndermanLeaveBlockGoal@@UEAA_NXZ",
 THook(Block*, "?getCarryingBlock@EnderMan@@QEAAAEBVBlock@@XZ",
     void* _this, Block* a1)
 {
-    return *(Block**)dlsym("?mAir@BedrockBlocks@@3PEBVBlock@@EB");;
+    return *(Block**)dlsym("?mAir@BedrockBlocks@@3PEBVBlock@@EB");
 }
 
 THook(void, "?setCarryingBlock@EnderMan@@QEAAXAEBVBlock@@@Z",
