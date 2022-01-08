@@ -10,8 +10,10 @@
 // 添加要在此处预编译的标头
 
 #include <iostream>
+
 #include <Global.h>
 #include <LLAPI.h>
+
 #include <MC/Player.hpp>
 #include <MC/Level.hpp>
 #include <MC/HashedString.hpp>
@@ -20,7 +22,22 @@
 #include <MC/ItemStack.hpp>
 #include <MC/Container.hpp>
 
-void turnOnLight(Player* pl, int lightLevel);
-void turnOffLight(Player* pl);
+#include <MC/VanillaBlocks.hpp>
+#include <MC/BinaryStream.hpp>
+#include <MC/MinecraftPackets.hpp>
+#include <MC/Dimension.hpp>
+#include <MC/Packet.hpp>
+
+/*
+THook(__int64, "?setBlockLight@SubChunkRelighter@@QEAAXAEBVPos@@UBrightness@@111@Z",
+    void* self, BlockPos* a1, char* a2, char* a3, char* a4, char* a5)
+{
+    a1 = Pos    位置
+    a2 = 14     若取消亮度，传值
+    a3 = 0      若设定亮度，传值
+    a4 = 0      Unknown
+    a5 = 0      Unknown
+}
+*/
 
 #endif //PCH_H
