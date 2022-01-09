@@ -4,7 +4,6 @@
 #define PLUGIN_H
 
 using namespace std;
-#include "EasyPkt.h"
 
 // RuntimeId = 5458 -> 5473 , LightBlock 1-14;
 bool sendNetBlock(BlockSource* bs, BlockPos bp, const unsigned int runtimeId)
@@ -16,11 +15,10 @@ bool sendNetBlock(BlockSource* bs, BlockPos bp, const unsigned int runtimeId)
     wp.writeVarInt(bp.z);
     wp.writeUnsignedVarInt(runtimeId);
     wp.writeUnsignedVarInt(3);
-    wp.writeUnsignedVarInt(0); // layer 0
-    EasyPkt pkt(wp.getRaw(), 21);
-    // auto pkt = MinecraftPackets::createPacket(MinecraftPacketIds::UpdateBlock);
-    // pkt->write(wp);
-    dim->sendPacketForPosition({ bp.x, bp.y, bp.z }, *(Packet*)&pkt, nullptr);
+    wp.writeUnsignedVarInt(0);
+    shared_ptr<Packet> pkt = MinecraftPackets::createPacket(MinecraftPacketIds::UpdateBlock);
+    pkt->read(wp);
+    dim->sendPacketForPosition({ bp.x, bp.y, bp.z }, *pkt, nullptr);
     return true;
 }
 

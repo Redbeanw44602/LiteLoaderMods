@@ -24,9 +24,6 @@
     <ClInclude Include="Plugin.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EasyPkt.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
