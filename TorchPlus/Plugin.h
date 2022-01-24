@@ -45,46 +45,52 @@ namespace FindTorch {
 }
 
 namespace LightMgr {
-    static unordered_map<Player*, BlockPos> sendedBlocks;
-    static unordered_map<Player*, bool> openedPlayers;
-
+    static unordered_map<Player*, bool> IsLighting;
+    static unordered_map<Player*, BlockPos> LightingPos;
+    static unordered_map<Player*, int> LightingLevel;
+    
     inline bool isTurningOn(Player* pl) {
-        return openedPlayers.count(pl) && openedPlayers[pl];
+        return IsLighting.count(pl) && IsLighting[pl];
     }
 
     inline void turnOff(Player* pl) {
         if (!isTurningOn(pl))
             return;
-        openedPlayers[pl] = false;
-        auto bs = &pl->getRegion();
-        auto& bp = sendedBlocks[pl];
+        IsLighting[pl] = false;
+        BlockSource* bs = &pl->getRegion();
+        BlockPos bp = LightingPos[pl];
         sendNetBlock(bs, bp, bs->getBlock(bp).getRuntimeId());
     }
 
     inline void turnOn(Player* pl, int lightLv) {
         BlockSource* bs = pl->getBlockSource();
-        auto tmp_pos = pl->getBlockPos();
-        BlockPos pos = { tmp_pos.x,tmp_pos.y + 1,tmp_pos.z };
+        BlockPos bp = pl->getBlockPos();
+        BlockPos pos = { bp.x,bp.y + 1,bp.z };
 
         bool isOpened = isTurningOn(pl);
-        if (isOpened && pos.operator==(sendedBlocks[pl]))
+        bool isSamePos = pos.operator==(LightingPos[pl]);
+        bool isSameLight = lightLv == LightingLevel[pl];
+        if (isOpened && isSamePos && isSameLight)
             return;
-
 
         if (bs->getBlock(pos).getName().getString() != "minecraft:air")
             return;
 
         sendNetBlock(bs, pos, VanillaBlocks::mLightBlock->getRuntimeId() - 15 + lightLv);
-        if (isOpened)
+        if (!isSamePos && (isOpened || !isSameLight))
             turnOff(pl);
-        sendedBlocks[pl] = pos;
-        openedPlayers[pl] = true;
+
+        IsLighting[pl] = true;
+        LightingPos[pl] = pos;
+        LightingLevel[pl] = lightLv;
+        
     }
 
     inline bool clear(Player* pl) {
         turnOff(pl);
-        sendedBlocks.erase(pl);
-        openedPlayers.erase(pl);
+        IsLighting.erase(pl);
+        LightingPos.erase(pl);
+        LightingLevel.erase(pl);
     }
 
 }
