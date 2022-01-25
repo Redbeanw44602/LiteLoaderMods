@@ -5,22 +5,7 @@
 
 using namespace std;
 
-// RuntimeId = 5458 -> 5473 , LightBlock 1-14;
-bool sendNetBlock(BlockSource* bs, BlockPos bp, const unsigned int runtimeId)
-{
-    auto dim = Global<Level>->getDimension(bs->getDimensionId());
-    BinaryStream wp;
-    wp.writeVarInt(bp.x);
-    wp.writeUnsignedVarInt(bp.y);
-    wp.writeVarInt(bp.z);
-    wp.writeUnsignedVarInt(runtimeId);
-    wp.writeUnsignedVarInt(3);
-    wp.writeUnsignedVarInt(0);
-    shared_ptr<Packet> pkt = MinecraftPackets::createPacket(MinecraftPacketIds::UpdateBlock);
-    pkt->read(wp);
-    dim->sendPacketForPosition({ bp.x, bp.y, bp.z }, *pkt, nullptr);
-    return true;
-}
+bool sendNetBlock(BlockSource* bs, BlockPos bp, const unsigned int runtimeId);
 
 namespace FindTorch {
     static unordered_map<string, int> Torches{
@@ -44,21 +29,25 @@ namespace FindTorch {
     }
 }
 
+struct LightInfo {
+    bool isLighting = false;
+    BlockPos lightingPos = BlockPos::ZERO;
+    int lightLevel = 0;
+};
+
 namespace LightMgr {
-    static unordered_map<Player*, bool> IsLighting;
-    static unordered_map<Player*, BlockPos> LightingPos;
-    static unordered_map<Player*, int> LightingLevel;
+    static unordered_map<Player*, LightInfo> RecordedInfo;
     
     inline bool isTurningOn(Player* pl) {
-        return IsLighting.count(pl) && IsLighting[pl];
+        return RecordedInfo.count(pl) && RecordedInfo[pl].isLighting;
     }
 
     inline void turnOff(Player* pl) {
         if (!isTurningOn(pl))
             return;
-        IsLighting[pl] = false;
+        RecordedInfo[pl].isLighting = false;
         BlockSource* bs = &pl->getRegion();
-        BlockPos bp = LightingPos[pl];
+        BlockPos bp = RecordedInfo[pl].lightingPos;
         sendNetBlock(bs, bp, bs->getBlock(bp).getRuntimeId());
     }
 
@@ -67,9 +56,10 @@ namespace LightMgr {
         BlockPos bp = pl->getBlockPos();
         BlockPos pos = { bp.x,bp.y + 1,bp.z };
 
+        auto &Info = RecordedInfo[pl];
         bool isOpened = isTurningOn(pl);
-        bool isSamePos = pos.operator==(LightingPos[pl]);
-        bool isSameLight = lightLv == LightingLevel[pl];
+        bool isSamePos = pos.operator==(Info.lightingPos);
+        bool isSameLight = lightLv == Info.lightLevel;
         if (isOpened && isSamePos && isSameLight)
             return;
 
@@ -80,17 +70,20 @@ namespace LightMgr {
         if (!isSamePos && (isOpened || !isSameLight))
             turnOff(pl);
 
-        IsLighting[pl] = true;
-        LightingPos[pl] = pos;
-        LightingLevel[pl] = lightLv;
+        Info.isLighting = true;
+        Info.lightingPos = pos;
+        Info.lightLevel = lightLv;
         
     }
 
-    inline bool clear(Player* pl) {
+    inline void init(Player* pl) {
+        LightInfo li;
+        RecordedInfo[pl] = li;
+    }
+
+    inline void clear(Player* pl) {
         turnOff(pl);
-        IsLighting.erase(pl);
-        LightingPos.erase(pl);
-        LightingLevel.erase(pl);
+        RecordedInfo.erase(pl);
     }
 
 }

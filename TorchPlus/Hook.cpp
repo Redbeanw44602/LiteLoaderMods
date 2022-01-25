@@ -29,10 +29,3 @@ THook(void, "?sendBlockDestructionStarted@BlockEventCoordinator@@QEAAXAEAVPlayer
         pl->sendInventory(true);
     }
 }
-
-THook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServerPlayer@@_N@Z",
-    ServerNetworkHandler* self, ServerPlayer* sp, bool a3)
-{
-    LightMgr::clear((Player*)sp);
-    original(self, sp, a3);
-}
