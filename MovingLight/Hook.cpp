@@ -5,7 +5,9 @@ THook(void, "?normalTick@Player@@UEAAXXZ",
     Player* pl)
 {
     original(pl);
-    int light = max(FindTorch::getBrightness(&pl->getSelectedItem()), FindTorch::getBrightness(&pl->getOffhandSlot()));
+    if (!Config::enable)
+        return;
+    int light = max(Config::getBrightness(&pl->getSelectedItem()), Config::getBrightness(&pl->getOffhandSlot()));
     if (light != 0)
         LightMgr::turnOn(pl, light);
     else
@@ -16,11 +18,13 @@ THook(void, "?sendBlockDestructionStarted@BlockEventCoordinator@@QEAAXAEAVPlayer
     void* self, Player* pl, BlockPos* bp)
 {
     original(self, pl, bp);
+    if (!Config::enable)
+        return;
     auto mainhand = &pl->getSelectedItem();
-    if (mainhand->isNull())
+    if (mainhand->isNull() || !Config::isOffhandItem(mainhand->getTypeName()))
         return;
     auto newHand = mainhand->clone_s();
-    if (FindTorch::isEnabled(newHand->getTypeName()) && pl->getOffhandSlot().isNull())
+    if (Config::isLightSource(newHand->getTypeName()) && pl->getOffhandSlot().isNull())
     {
         auto& cont = pl->getInventory();
         auto nowSlot = pl->getSelectedItemSlot();

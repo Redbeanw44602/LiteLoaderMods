@@ -1,0 +1,57 @@
+#include "pch.h"
+#include <EventAPI.h>
+#include <LoggerAPI.h>
+#include <third-party/Nlohmann/json.hpp>
+#include <filesystem>
+#include "Plugin.h"
+
+using namespace std;
+using namespace LL;
+
+namespace fs = filesystem;
+
+Logger logger("MovingLight");
+Version PLUGIN_VERSION { 1,7,0,Version::Release };
+
+void PluginMain()
+{
+    logger.info("loaded, ver " + PLUGIN_VERSION.toString() + ", author: redbeanw.");
+}
+
+void PluginInit()
+{
+    // Read config
+    if (!fs::exists("plugins/MovingLight/")) {
+        logger.warn("Could not find the directory for the configuration file, creating...");
+        fs::create_directory("plugins/MovingLight/");
+    }
+    if (!fs::exists("plugins/MovingLight/config.json")) {
+        logger.warn("Configuration file not found, creating...");
+        ofstream ofile;
+        ofile.open("plugins/MovingLight/config.json");
+        ofile << Config::to_json();
+        ofile.close();
+    }
+    ifstream ifile;
+    ifile.open("plugins/MovingLight/config.json");
+    auto j = json::parse(ifile);
+    Config::from_json(j);
+    ifile.close();
+    
+    // Register plugin to LL.
+    LL::registerPlugin("MovingLight", "The moving light.", PLUGIN_VERSION, { {"Author","RedbeanW"}, {"Github","https://github.com/Redbeanw44602/LiteLoaderMods.git"} });
+    
+    // Register event listener.
+    Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
+        PluginMain();
+        return true;
+    });
+    Event::PlayerPreJoinEvent::subscribe([](Event::PlayerPreJoinEvent ev) -> bool {
+        LightMgr::init(ev.mPlayer);
+        return true;
+    });
+    Event::PlayerLeftEvent::subscribe([](Event::PlayerLeftEvent ev) -> bool {
+        LightMgr::clear(ev.mPlayer);
+        return true;
+    });
+}

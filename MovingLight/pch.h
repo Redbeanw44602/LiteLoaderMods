@@ -28,32 +28,4 @@
 #include <MC/Dimension.hpp>
 #include <MC/Packet.hpp>
 
-/*
-THook(__int64, "?setBlockLight@SubChunkRelighter@@QEAAXAEBVPos@@UBrightness@@111@Z",
-    void* self, BlockPos* a1, char* a2, char* a3, char* a4, char* a5)
-{
-    a1 = Pos    位置
-    a2 = 14     若取消亮度，传值
-    a3 = 0      若设定亮度，传值
-    a4 = 0      Unknown
-    a5 = 0      Unknown
-}
-
-THook(bool, "?_attachedBlockWalker@PistonBlockActor@@AEAA_NAEAVBlockSource@@AEBVBlockPos@@EE@Z",
-    void* _this, BlockSource* a2, const BlockPos* a3, unsigned __int8 a4, char a5)
-{
-    if (a2->getBlock(*a3).getName().getString() == "minecraft:light_block")
-        return false;
-    return original(_this, a2, a3, a4, a5);
-}
-
-THook(float, "?getExplosionResistance@Block@@QEBAMPEAVActor@@@Z",
-    Block* bl, Actor* ac)
-{
-    if (bl->getName().getString() == "minecraft:light_block")
-        return 1.8e+07; // bedrock
-    return original(bl, ac);
-}
-*/
-
 #endif //PCH_H
