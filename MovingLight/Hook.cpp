@@ -39,12 +39,12 @@ THook(void, "?normalTick@Player@@UEAAXXZ",
     Player* pl)
 {
     original(pl);
-    if (!Config::enable)
+    if (!Config::enable || !pl->isRegionValid())
         return;
     int light = max(Config::getBrightness(&pl->getSelectedItem()), Config::getBrightness(&pl->getOffhandSlot()));
     auto& id = pl->getUniqueID();
     if (light != 0)
-        LightMgr::turnOn(id, &pl->getRegion(), pl->getBlockPos(), light);
+        LightMgr::turnOn(id, pl->getBlockSource(), pl->getBlockPos(), light);
     else
         LightMgr::turnOff(id);
 }
@@ -53,7 +53,7 @@ THook(void, "?normalTick@ItemActor@@UEAAXXZ",
     ItemActor* self)
 {
     original(self);
-    if (!Config::enable || !Config::enableItemActor)
+    if (!Config::enable || !Config::enableItemActor || !self->isRegionValid())
         return;
     int light = Config::getBrightness(self->getItemStack());
     auto& id = self->getUniqueID();

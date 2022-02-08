@@ -124,7 +124,8 @@ namespace LightMgr {
         RecordedInfo[id].mLighting = false;
         BlockPos bp = RecordedInfo[id].mPos;
         auto region = RecordedInfo[id].mRegion;
-        PacketHelper::UpdateBlockPacket(region, bp, region->getBlock(bp).getRuntimeId());
+        if (region)
+            PacketHelper::UpdateBlockPacket(region, bp, region->getBlock(bp).getRuntimeId());
     }
 
     inline void turnOn(ActorUniqueID id, BlockSource* region, BlockPos bp, int lightLv) {
