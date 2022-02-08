@@ -5,9 +5,12 @@
 using namespace std;
 #include "PacketHelper.h"
 
+typedef long long UniqueID;
+
 namespace Config {
 
     static bool enable = true;
+    static bool enableItemActor = true;
     static unsigned int VERSION = 100;
 
     static unordered_map<string, unsigned int> items = {
@@ -86,10 +89,7 @@ namespace Config {
         if (it->isNull())
             return 0;
         auto name = it->getTypeName();
-        auto light = 0;
-        if (isLightSource(name))
-            light = Config::items[name];
-        return light;
+        return isLightSource(name) ? Config::items[name] : 0;
     }
 
 };
@@ -97,59 +97,64 @@ namespace Config {
 namespace LightMgr {
 
     struct LightInfo {
-        bool isLighting = false;
-        BlockPos lightingPos = BlockPos::ZERO;
-        int lightLevel = 0;
+        bool mLighting = false;
+        unsigned int mLevel = 0;
+        BlockPos mPos = BlockPos::ZERO;
+        BlockSource* mRegion = nullptr;
     };
 
-    static unordered_map<Player*, LightInfo> RecordedInfo;
+    static unordered_map<UniqueID, LightInfo> RecordedInfo;
     
-    inline bool isTurningOn(Player* pl) {
-        return RecordedInfo.count(pl) && RecordedInfo[pl].isLighting;
+    inline bool isVaild(ActorUniqueID id) {
+        return RecordedInfo.count(id);
     }
 
-    inline void turnOff(Player* pl) {
-        if (!isTurningOn(pl))
+    inline void init(ActorUniqueID id) {
+        LightInfo li;
+        RecordedInfo[id] = li;
+    }
+
+    inline bool isTurningOn(ActorUniqueID id) {
+        return isVaild(id) && RecordedInfo[id].mLighting;
+    }
+
+    inline void turnOff(ActorUniqueID id) {
+        if (!isTurningOn(id))
             return;
-        RecordedInfo[pl].isLighting = false;
-        BlockSource* bs = &pl->getRegion();
-        BlockPos bp = RecordedInfo[pl].lightingPos;
-        PacketHelper::UpdateBlockPacket(bs, bp, bs->getBlock(bp).getRuntimeId());
+        RecordedInfo[id].mLighting = false;
+        BlockPos bp = RecordedInfo[id].mPos;
+        auto region = RecordedInfo[id].mRegion;
+        PacketHelper::UpdateBlockPacket(region, bp, region->getBlock(bp).getRuntimeId());
     }
 
-    inline void turnOn(Player* pl, int lightLv) {
-        BlockSource* bs = pl->getBlockSource();
-        BlockPos bp = pl->getBlockPos();
-        BlockPos pos = { bp.x,bp.y + 1,bp.z };
-
-        auto &Info = RecordedInfo[pl];
-        bool isOpened = isTurningOn(pl);
-        bool isSamePos = pos.operator==(Info.lightingPos);
-        bool isSameLight = lightLv == Info.lightLevel;
+    inline void turnOn(ActorUniqueID id, BlockSource* region, BlockPos bp, int lightLv) {
+        if (!isVaild(id))
+            init(id);
+        auto& Info = RecordedInfo[id];
+        bool isOpened = isTurningOn(id);
+        bool isSamePos = bp.operator==(Info.mPos);
+        bool isSameLight = lightLv == Info.mLevel;
         if (isOpened && isSamePos && isSameLight)
             return;
 
-        if (bs->getBlock(pos).getName().getString() != "minecraft:air")
+        auto& name = region->getBlock(bp).getName().getString();
+        if (name == "minecraft:lava" || name == "minecraft:water")
             return;
 
-        PacketHelper::UpdateBlockPacket(bs, pos, VanillaBlocks::mLightBlock->getRuntimeId() - 15 + lightLv);
+        PacketHelper::UpdateBlockPacket(region, bp, VanillaBlocks::mLightBlock->getRuntimeId() - 15 + lightLv);
         if (!isSamePos && (isOpened || !isSameLight))
-            turnOff(pl);
+            turnOff(id);
 
-        Info.isLighting = true;
-        Info.lightingPos = pos;
-        Info.lightLevel = lightLv;
+        Info.mLighting = true;
+        Info.mRegion = region;
+        Info.mPos = bp;
+        Info.mLevel = lightLv;
         
     }
 
-    inline void init(Player* pl) {
-        LightInfo li;
-        RecordedInfo[pl] = li;
-    }
-
-    inline void clear(Player* pl) {
-        turnOff(pl);
-        RecordedInfo.erase(pl);
+    inline void clear(ActorUniqueID id) {
+        turnOff(id);
+        RecordedInfo.erase(id);
     }
 
 }

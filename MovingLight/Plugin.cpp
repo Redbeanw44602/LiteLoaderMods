@@ -11,7 +11,7 @@ using namespace LL;
 namespace fs = filesystem;
 
 Logger logger("MovingLight");
-Version PLUGIN_VERSION { 1,7,0,Version::Release };
+Version PLUGIN_VERSION { 1,7,1,Version::Release };
 
 void PluginMain()
 {
@@ -46,12 +46,8 @@ void PluginInit()
         PluginMain();
         return true;
     });
-    Event::PlayerPreJoinEvent::subscribe([](Event::PlayerPreJoinEvent ev) -> bool {
-        LightMgr::init(ev.mPlayer);
-        return true;
-    });
     Event::PlayerLeftEvent::subscribe([](Event::PlayerLeftEvent ev) -> bool {
-        LightMgr::clear(ev.mPlayer);
+        LightMgr::clear(ev.mPlayer->getUniqueID());
         return true;
     });
 }
