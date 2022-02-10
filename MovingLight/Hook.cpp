@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Plugin.h"
 #include <MC/ItemActor.hpp>
+#include <MC/ServerPlayer.hpp>
 
 // OffHand Helper
 
@@ -33,6 +34,13 @@ THook(ItemActor*, "??_EItemActor@@UEAAPEAXI@Z",
     return original(self, a2);
 }
 
+THook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServerPlayer@@_N@Z",
+    void* self, ServerPlayer* sp, bool broadcast)
+{
+    LightMgr::clear(sp->getUniqueID());
+    original(self, sp, broadcast);
+}
+
 // Tick
 
 THook(void, "?normalTick@Player@@UEAAXXZ",
@@ -44,7 +52,7 @@ THook(void, "?normalTick@Player@@UEAAXXZ",
     int light = max(Config::getBrightness(&pl->getSelectedItem()), Config::getBrightness(&pl->getOffhandSlot()));
     auto& id = pl->getUniqueID();
     if (light != 0)
-        LightMgr::turnOn(id, pl->getBlockSource(), pl->getBlockPos(), light);
+        LightMgr::turnOn(id, &pl->getRegion(), pl->getBlockPos(), light);
     else
         LightMgr::turnOff(id);
 }

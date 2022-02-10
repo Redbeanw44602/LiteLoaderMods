@@ -18,8 +18,8 @@ namespace PacketHelper {
             PENETRATE = 1
             NOUPDATE = 2
     */
-    inline bool UpdateBlockPacket(BlockSource* bs, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
-        auto dim = Global<Level>->getDimension(bs->getDimensionId());
+
+    inline void UpdateBlockPacket(Dimension* dim, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
         BinaryStream wp;
         wp.writeVarInt(bp.x);
         wp.writeUnsignedVarInt(bp.y);
@@ -30,8 +30,15 @@ namespace PacketHelper {
         shared_ptr<Packet> pkt = MinecraftPackets::createPacket(MinecraftPacketIds::UpdateBlock);
         pkt->read(wp);
         dim->sendPacketForPosition({ bp.x, bp.y, bp.z }, *pkt, nullptr);
-        return true;
     };
+
+    inline void UpdateBlockPacket(int dimId, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
+        auto dim = Global<Level>->getDimension(dimId);
+        if (!dim)
+            return;
+        UpdateBlockPacket(dim, bp, runtimeId);
+    };
+
 };
 
 #endif // !PACKETHELPER_H

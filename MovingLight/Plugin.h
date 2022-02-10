@@ -100,7 +100,7 @@ namespace LightMgr {
         bool mLighting = false;
         unsigned int mLevel = 0;
         BlockPos mPos = BlockPos::ZERO;
-        BlockSource* mRegion = nullptr;
+        int mDimId = -1;
     };
 
     static unordered_map<UniqueID, LightInfo> RecordedInfo;
@@ -122,10 +122,10 @@ namespace LightMgr {
         if (!isTurningOn(id))
             return;
         RecordedInfo[id].mLighting = false;
-        BlockPos bp = RecordedInfo[id].mPos;
-        auto region = RecordedInfo[id].mRegion;
-        if (region)
-            PacketHelper::UpdateBlockPacket(region, bp, region->getBlock(bp).getRuntimeId());
+        auto pos = RecordedInfo[id].mPos;
+        auto dim = Global<Level>->getDimension(RecordedInfo[id].mDimId);
+        auto region = &dim->getBlockSourceFromMainChunkSource();
+        PacketHelper::UpdateBlockPacket(dim, pos, region->getBlock(pos).getRuntimeId());
     }
 
     inline void turnOn(ActorUniqueID id, BlockSource* region, BlockPos bp, int lightLv) {
@@ -142,12 +142,13 @@ namespace LightMgr {
         if (name == "minecraft:lava" || name == "minecraft:water")
             return;
 
-        PacketHelper::UpdateBlockPacket(region, bp, VanillaBlocks::mLightBlock->getRuntimeId() - 15 + lightLv);
+        auto dimId = region->getDimensionId();
+        PacketHelper::UpdateBlockPacket(dimId, bp, VanillaBlocks::mLightBlock->getRuntimeId() - 15 + lightLv);
         if (!isSamePos && (isOpened || !isSameLight))
             turnOff(id);
 
         Info.mLighting = true;
-        Info.mRegion = region;
+        Info.mDimId = dimId;
         Info.mPos = bp;
         Info.mLevel = lightLv;
         

@@ -40,14 +40,9 @@ void PluginInit()
     
     // Register plugin to LL.
     LL::registerPlugin("MovingLight", "The moving light.", PLUGIN_VERSION, { {"Author","RedbeanW"}, {"Github","https://github.com/Redbeanw44602/LiteLoaderMods.git"} });
-    
-    // Register event listener.
     Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
         PluginMain();
         return true;
     });
-    Event::PlayerLeftEvent::subscribe([](Event::PlayerLeftEvent ev) -> bool {
-        LightMgr::clear(ev.mPlayer->getUniqueID());
-        return true;
-    });
+
 }
