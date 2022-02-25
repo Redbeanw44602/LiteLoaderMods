@@ -20,6 +20,8 @@ namespace PacketHelper {
     */
 
     inline void UpdateBlockPacket(Dimension* dim, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
+        if (!dim)
+            return;
         BinaryStream wp;
         wp.writeVarInt(bp.x);
         wp.writeUnsignedVarInt(bp.y);
@@ -34,8 +36,6 @@ namespace PacketHelper {
 
     inline void UpdateBlockPacket(int dimId, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
         auto dim = Global<Level>->getDimension(dimId);
-        if (!dim)
-            return;
         UpdateBlockPacket(dim, bp, runtimeId);
     };
 

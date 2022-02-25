@@ -104,6 +104,11 @@ namespace LightMgr {
     };
 
     static unordered_map<UniqueID, LightInfo> RecordedInfo;
+    static vector<string> bannedBlocks = {
+        "minecraft:lava",
+        "minecraft:water",
+        "minecraft:snow_layer"
+    };
     
     inline bool isVaild(ActorUniqueID id) {
         return RecordedInfo.count(id);
@@ -124,22 +129,28 @@ namespace LightMgr {
         RecordedInfo[id].mLighting = false;
         auto pos = RecordedInfo[id].mPos;
         auto dim = Global<Level>->getDimension(RecordedInfo[id].mDimId);
-        auto region = &dim->getBlockSourceFromMainChunkSource();
-        PacketHelper::UpdateBlockPacket(dim, pos, region->getBlock(pos).getRuntimeId());
+        if (dim)
+        {
+            auto region = &dim->getBlockSourceFromMainChunkSource();
+            PacketHelper::UpdateBlockPacket(dim, pos, region->getBlock(pos).getRuntimeId());
+        }
     }
 
     inline void turnOn(ActorUniqueID id, BlockSource* region, BlockPos bp, int lightLv) {
+        if (!region)
+            return;
         if (!isVaild(id))
             init(id);
         auto& Info = RecordedInfo[id];
         bool isOpened = isTurningOn(id);
+        bp.y = bp.y + 1;
         bool isSamePos = bp.operator==(Info.mPos);
         bool isSameLight = lightLv == Info.mLevel;
         if (isOpened && isSamePos && isSameLight)
             return;
 
         auto& name = region->getBlock(bp).getName().getString();
-        if (name == "minecraft:lava" || name == "minecraft:water")
+        if (count(bannedBlocks.begin(), bannedBlocks.end(), name))
             return;
 
         auto dimId = region->getDimensionId();

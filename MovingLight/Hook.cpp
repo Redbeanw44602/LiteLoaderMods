@@ -65,7 +65,6 @@ THook(void, "?normalTick@ItemActor@@UEAAXXZ",
         return;
     int light = Config::getBrightness(self->getItemStack());
     auto& id = self->getUniqueID();
-    
     if (light != 0)
         LightMgr::turnOn(id, &self->getRegion(), self->getBlockPos(), light);
     else

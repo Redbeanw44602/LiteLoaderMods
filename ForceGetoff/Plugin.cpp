@@ -25,7 +25,7 @@ void PluginMain()
 
 void PluginInit()
 {
-	registerPlugin("ForceGetoff", "Make entity get off from boat/horse...", Version{ 1,0,3,Version::Release }, { {"Author","Redbeanw"} });
+	registerPlugin("ForceGetoff", "Make entity get off from boat/horse...", Version{ 1,0,4,Version::Release }, { {"Author","Redbeanw"} });
 	Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
 		PluginMain();
 		return true;

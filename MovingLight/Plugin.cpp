@@ -11,7 +11,7 @@ using namespace LL;
 namespace fs = filesystem;
 
 Logger logger("MovingLight");
-Version PLUGIN_VERSION { 1,7,2,Version::Release };
+Version PLUGIN_VERSION { 1,7,4,Version::Release };
 
 void PluginMain()
 {
