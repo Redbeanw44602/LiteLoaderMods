@@ -27,6 +27,13 @@ THook(void, "?sendBlockDestructionStarted@BlockEventCoordinator@@QEAAXAEAVPlayer
 
 // Remove
 
+THook(void, "?execute@StopCommand@@UEBAXAEBVCommandOrigin@@AEAVCommandOutput@@@Z",
+    void* self, void* a2, void* a3)
+{
+    PacketHelper::stopSending = true;
+    original(self, a2, a3);
+}
+
 THook(ItemActor*, "??_EItemActor@@UEAAPEAXI@Z",
     ItemActor* self, char a2)
 {

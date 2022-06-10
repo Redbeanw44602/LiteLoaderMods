@@ -12,7 +12,7 @@ void PluginMain()
 
 void PluginInit()
 {
-	registerPlugin("NoWitherDestroy", "Block wither destroy.", Version{ 1,0,3,Version::Release }, { {"Author","Redbeanw"} });
+	registerPlugin("NoWitherDestroy", "Block wither destroy.", Version{ 1,0,4,Version::Release }, { {"Author","Redbeanw"} });
 	Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
 		PluginMain();
 		return true;

@@ -19,8 +19,10 @@ namespace PacketHelper {
             NOUPDATE = 2
     */
 
+    static bool stopSending = false;
+
     inline void UpdateBlockPacket(Dimension* dim, BlockPos bp, const unsigned int runtimeId, unsigned int layer = 1) {
-        if (!dim)
+        if (!dim || stopSending)
             return;
         BinaryStream wp;
         wp.writeVarInt(bp.x);

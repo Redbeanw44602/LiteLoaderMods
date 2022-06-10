@@ -13,7 +13,7 @@ void PluginMain()
 
 void PluginInit()
 {
-	registerPlugin("AlwaysBroadcast", "Fix an broadcast bug in bds.", Version{ 1,0,4,Version::Release }, { {"Author","RedbeanW"} });
+	registerPlugin("AlwaysBroadcast", "Fix an broadcast bug in bds.", Version{ 1,0,5,Version::Release }, { {"Author","RedbeanW"} });
 	Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
 		PluginMain();
 		return true;

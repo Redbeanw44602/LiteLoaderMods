@@ -12,7 +12,7 @@ void PluginMain()
 
 void PluginInit()
 {
-    registerPlugin("EndermanNoBlock", "Forbid enderman carry block.", Version{ 1,0,3,Version::Release }, { {"Author","RedbeanW"} });
+    registerPlugin("EndermanNoBlock", "Forbid enderman carry block.", Version{ 1,0,5,Version::Release }, { {"Author","RedbeanW"} });
 	Event::ServerStartedEvent::subscribe([](Event::ServerStartedEvent ev) -> bool {
 		PluginMain();
 		return true;
@@ -31,7 +31,7 @@ THook(bool, "?canUse@EndermanLeaveBlockGoal@@UEAA_NXZ",
     return false;
 }
 
-THook(Block*, "?getCarryingBlock@EnderMan@@QEAAAEBVBlock@@XZ",
+THook(Block*, "?getCarryingBlock@EnderMan@@QEBAAEBVBlock@@XZ",
     void* _this, Block* a1)
 {
     return *(Block**)dlsym("?mAir@BedrockBlocks@@3PEBVBlock@@EB");
